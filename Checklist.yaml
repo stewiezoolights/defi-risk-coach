@@ -1,0 +1,65 @@
+
+---
+
+# 2️⃣ Chainlink Hackathon Checklist
+
+## ✅ Phase 1 — Project Setup (Week 1)
+
+- [✅] Repo initialized & structured
+- [✅] Architecture mapped out
+- [ ] First draft of contracts written
+- [ ] First Chainlink Function runs on testnet
+
+## ✅ Phase 2 — Core Development (Week 2-3)
+
+- [ ] Contract logic complete (RiskLock, GuardianManager)
+- [ ] Chainlink Functions integrated with DEX monitor
+- [ ] Frontend UI basic version working
+- [ ] AI Coach prompts drafted and tested
+
+## ✅ Phase 3 — Polish & Submission (Final Week)
+
+- [ ] Frontend polished
+- [ ] End-to-end flow demo ready
+- [ ] Video recorded (2-3 min)
+- [ ] Architecture diagram final
+- [ ] Repo cleaned & documented
+- [ ] Submission form filled
+
+---
+
+# 3️⃣ Architecture Diagram 
+
+Flow:
+
++-------------------------+
+|      User Wallet        |
++-------------------------+
+              |
+              v
++-------------------------+
+|   React Frontend (Vite) |
++-------------------------+
+              |
+              v
++-------------------------+
+|  AI Coach (ElizaOS) API |
++-------------------------+
+              |
+              v
++-------------------------+
+| Chainlink Functions     |
+|   (DEX Activity Check)  |
++-------------------------+
+              |
+              v
++-------------------------+
+|   Smart Contracts       |
+| - RiskLock.sol          |
+| - GuardianManager.sol   |
++-------------------------+
+              |
+              v
++-------------------------+
+|      DEX / Blockchain   |
++-------------------------+
