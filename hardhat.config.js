@@ -1,18 +1,11 @@
-require("@chainlink/functions-toolkit-hardhat-plugin");
 require("@nomicfoundation/hardhat-toolbox");
-require("hardhat-contract-sizer");
+require("dotenv").config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+const BASE_SEPOLIA_RPC =
+  process.env.BASE_SEPOLIA_RPC || "https://sepolia.base.org";
 
 module.exports = {
-  defaultNetwork: "baseSepolia",
-  networks: {
-    baseSepolia: {
-      url: "https://sepolia.base.org", // Base Sepolia RPC
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-  },
   solidity: {
     version: "0.8.19",
     settings: {
@@ -22,7 +15,10 @@ module.exports = {
       },
     },
   },
-  etherscan: {
-    apiKey: ETHERSCAN_API_KEY,
+  networks: {
+    baseSepolia: {
+      url: BASE_SEPOLIA_RPC,
+      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
+    },
   },
 };

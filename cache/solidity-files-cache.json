@@ -1,0 +1,369 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/steventemple/Desktop/Projects/defi-risk-coach/contracts/Gaurdian.sol": {
+      "lastModificationDate": 1750081664756,
+      "contentHash": "8dc89f64d0559384ddb5e60da4474198",
+      "sourceName": "contracts/Gaurdian.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "Guardian"
+      ]
+    },
+    "/Users/steventemple/Desktop/Projects/defi-risk-coach/contracts/RiskFunctionsConsumer.sol": {
+      "lastModificationDate": 1750092376012,
+      "contentHash": "d22f488340549179610d98da9c9e7cf3",
+      "sourceName": "contracts/RiskFunctionsConsumer.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "node_modules/@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IRiskLock",
+        "RiskFunctionsConsumer"
+      ]
+    },
+    "/Users/steventemple/Desktop/Projects/defi-risk-coach/node_modules/@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol": {
+      "lastModificationDate": 1750088949368,
+      "contentHash": "03c4620e369a0fa92a95a17988313bdb",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IFunctionsRouter.sol",
+        "./interfaces/IFunctionsClient.sol",
+        "./libraries/FunctionsRequest.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "FunctionsClient"
+      ]
+    },
+    "/Users/steventemple/Desktop/Projects/defi-risk-coach/node_modules/@chainlink/contracts/src/v0.8/functions/v1_0_0/interfaces/IFunctionsRouter.sol": {
+      "lastModificationDate": 1750088949971,
+      "contentHash": "e02e28dbe30aacda992e51136ceccf1b",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/functions/v1_0_0/interfaces/IFunctionsRouter.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../libraries/FunctionsResponse.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IFunctionsRouter"
+      ]
+    },
+    "/Users/steventemple/Desktop/Projects/defi-risk-coach/node_modules/@chainlink/contracts/src/v0.8/functions/v1_0_0/interfaces/IFunctionsClient.sol": {
+      "lastModificationDate": 1750088949962,
+      "contentHash": "2a200f8d13068f38d2e43aba82a42762",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/functions/v1_0_0/interfaces/IFunctionsClient.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IFunctionsClient"
+      ]
+    },
+    "/Users/steventemple/Desktop/Projects/defi-risk-coach/node_modules/@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol": {
+      "lastModificationDate": 1750088949415,
+      "contentHash": "8ca65d4666bcf1f4e3b01ac976f96dce",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../../vendor/solidity-cborutils/v2.0.0/CBOR.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "FunctionsRequest"
+      ]
+    },
+    "/Users/steventemple/Desktop/Projects/defi-risk-coach/node_modules/@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsResponse.sol": {
+      "lastModificationDate": 1750088949419,
+      "contentHash": "70264441a9fdb243ed16851adfd67b11",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsResponse.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "FunctionsResponse"
+      ]
+    },
+    "/Users/steventemple/Desktop/Projects/defi-risk-coach/node_modules/@chainlink/contracts/src/v0.8/vendor/solidity-cborutils/v2.0.0/CBOR.sol": {
+      "lastModificationDate": 1750088948052,
+      "contentHash": "a496b670d630b3529a54986cd1148896",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/vendor/solidity-cborutils/v2.0.0/CBOR.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../@ensdomains/buffer/v0.1.0/Buffer.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "CBOR"
+      ]
+    },
+    "/Users/steventemple/Desktop/Projects/defi-risk-coach/node_modules/@chainlink/contracts/src/v0.8/vendor/@ensdomains/buffer/v0.1.0/Buffer.sol": {
+      "lastModificationDate": 1750088947196,
+      "contentHash": "f56822d17e35b3259cbdb1318c866e20",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/vendor/@ensdomains/buffer/v0.1.0/Buffer.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Buffer"
+      ]
+    },
+    "/Users/steventemple/Desktop/Projects/defi-risk-coach/contracts/RiskLock.sol": {
+      "lastModificationDate": 1749924428579,
+      "contentHash": "c3788559961e3d8b77f0fddb2e861427",
+      "sourceName": "contracts/RiskLock.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IGuardian",
+        "RiskLock"
+      ]
+    }
+  }
+}
