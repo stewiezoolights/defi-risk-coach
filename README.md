@@ -1,6 +1,6 @@
-# Defi Risk Coach 🛡️ - Chainlink Hackathon 2025 🚀
+# Perp-DEX Risk Coach 🛡️ - Chainlink Hackathon 2025 🚀
 
-**Project Theme:** Helping crypto traders mitigate gambling behavior behaviors & manage risk using decentralized tools.
+**Project Theme:** Helping crypto traders mitigate gambling behaviors & manage risk using decentralized tools.
 
 **Project Scope:**  
 A smart contract system designed to mitigate compulsive trading behavior by using Chainlink Functions, Chainlink Automation, and ElizaOS AI to monitor DeFi trader performance (e.g. % PnL, trade count) and enforce wallet cooldowns when risk thresholds are exceeded.
@@ -11,15 +11,15 @@ A smart contract system designed to mitigate compulsive trading behavior by usin
 
 - 🧠 **AI Coach (ElizaOS)**: Personalized interaction & behavioral nudging
 - 🔍 **On-Chain Risk Contracts**: Trade limits, lock wallets, guardian-controlled unlocks
-- ⛓️ **Chainlink Functions**: Monitors user DEX activity and off-chain metrics
-- ⛓️ **Chainlink Automation**: Monitors user DEX activity and off-chain metrics
+- ⛓️ **Chainlink Functions**: Monitors user Perp-DEX activity and off-chain metrics
+- ⛓️ **Chainlink Automation**: Locks the users wallet based on functions results
 - 🌐 **Frontend App**: Simple wallet interface to configure and monitor risk settings
 
 ---
 
 ## 🗺️ Architecture
 
-- React frontend → AI Coach → Chainlink Functions → Smart Contracts → DEX Data
+- React frontend → AI Coach → Chainlink Functions → Smart Contracts → Perp-DEX Data
 
 **Flow Explanation:**
 
