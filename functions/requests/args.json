@@ -1,7 +1,1 @@
-{
-  "walletAddress": "0xYourWalletAddressHere",
-  "maxLossPercentPerTrade": 10,
-  "maxLossTradesInTimeframe": 3,
-  "maxTradesInTimeframe": 10,
-  "timeframeHours": 24
-}
+["0xUserWalletAddressHere", "0xYourRiskLockContractAddressHere"]

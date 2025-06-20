@@ -2,8 +2,8 @@
 pragma solidity ^0.8.19;
 
 interface IRiskLock {
-    function updateLockFromFunctions(bool locked) external;
-    function isLocked() external view returns (bool);
+    function updateLockFromFunctions(address user, bool locked) external;
+    function isLocked(address user) external view returns (bool);
 }
 
 contract RiskCooldownProxy {
@@ -31,48 +31,62 @@ contract RiskCooldownProxy {
         _;
     }
 
-    /// @notice Called by ElizaOS to initiate lock with cooldown
     function onLockTriggered(address user, uint256 cooldownSeconds) external onlyEliza {
         require(user != address(0), "Invalid user");
         require(cooldownSeconds > 0, "Cooldown must be > 0");
 
         uint256 unlockAt = block.timestamp + cooldownSeconds;
-        locks[user] = LockInfo({
-            unlockTimestamp: unlockAt,
-            isActive: true
-        });
+        locks[user] = LockInfo(unlockAt, true);
 
-        riskLock.updateLockFromFunctions(true);
+        riskLock.updateLockFromFunctions(user, true);
         emit LockTriggered(user, unlockAt);
     }
 
-    /// @notice Chainlink Automation check to see if any cooldowns have expired
-    function checkUpkeep(bytes calldata) external view returns (bool upkeepNeeded, bytes memory performData) {
-        if (locks[tx.origin].isActive && block.timestamp >= locks[tx.origin].unlockTimestamp) {
-            return (true, abi.encode(tx.origin));
+    /// Chainlink Automation-compatible interface
+    function checkUpkeep(bytes calldata checkData) external view returns (bool upkeepNeeded, bytes memory performData) {
+        address user = abi.decode(checkData, (address));
+        LockInfo memory info = locks[user];
+
+        if (info.isActive && block.timestamp >= info.unlockTimestamp) {
+            return (true, abi.encode(user));
         }
-        return (false, bytes(""));
+
+        return (false, "");
     }
 
-    /// @notice Chainlink Automation executes unlocks
     function performUpkeep(bytes calldata performData) external {
         address user = abi.decode(performData, (address));
         LockInfo storage info = locks[user];
 
         require(info.isActive, "No active lock");
-        require(block.timestamp >= info.unlockTimestamp, "Cooldown not over");
+        require(block.timestamp >= info.unlockTimestamp, "Cooldown not finished");
 
         info.isActive = false;
-        riskLock.updateLockFromFunctions(false);
+        riskLock.updateLockFromFunctions(user, false);
         emit AutoUnlockPerformed(user);
     }
 
-    /// @notice Manual read for frontends or Eliza
-    function getCooldownRemaining(address user) external view returns (uint256 secondsLeft) {
+    function getCooldownRemaining(address user) external view returns (uint256) {
         LockInfo memory info = locks[user];
         if (!info.isActive || block.timestamp >= info.unlockTimestamp) {
             return 0;
         }
         return info.unlockTimestamp - block.timestamp;
+    }
+
+    /// ElizaOS off-chain hook for decision making
+    function getUserState(address user) external view returns (
+        bool locked,
+        uint256 unlockIn,
+        bool canAutoUnlock
+    ) {
+        LockInfo memory info = locks[user];
+        bool isCurrentlyLocked = riskLock.isLocked(user);
+        bool expired = block.timestamp >= info.unlockTimestamp;
+        return (
+            isCurrentlyLocked,
+            expired ? 0 : info.unlockTimestamp - block.timestamp,
+            info.isActive && expired
+        );
     }
 }

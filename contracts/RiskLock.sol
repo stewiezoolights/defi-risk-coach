@@ -1,22 +1,30 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-/// @title RiskLock - A locking mechanism governed by a Chainlink Functions consumer and guardian contract
-/// @notice Initially deployed with only the guardian; the FunctionsConsumer address is set once post-deploy
-/// @dev Designed for extensibility, e.g. ElizaOS AI agents via proxy adapter in the future
-
 interface IGuardian {
     function isGuardian(address caller) external view returns (bool);
 }
 
 contract RiskLock {
+    struct UserParameters {
+        uint256 maxLossPercentPerTrade;
+        uint256 maxLossTradesInTimeframe;
+        uint256 maxTradesInTimeframe;
+        uint256 cooldownDuration;
+        uint256 lastUpdated;
+        bool isLocked;
+        bool guardianApproved;
+    }
+
+    mapping(address => UserParameters) public userParams;
     address public guardianContract;
     address public functionsConsumer;
-    bool public isLocked;
     address public owner;
 
-    event LockUpdated(bool locked);
+    event LockUpdated(address indexed user, bool locked);
     event ConsumerUpdated(address newConsumer);
+    event ParametersUpdated(address indexed user, UserParameters params);
+    event GuardianOverride(address indexed user, bool approved);
 
     modifier onlyConsumer() {
         require(msg.sender == functionsConsumer, "Not FunctionsConsumer");
@@ -34,8 +42,6 @@ contract RiskLock {
         owner = msg.sender;
     }
 
-    /// @notice One-time setup for the address that can call `updateLockFromFunctions`
-    /// @dev Only callable once by the owner. Prevents overwriting the consumer address.
     function setFunctionsConsumer(address _consumer) external onlyOwner {
         require(functionsConsumer == address(0), "Consumer already set");
         require(_consumer != address(0), "Invalid consumer address");
@@ -43,16 +49,60 @@ contract RiskLock {
         emit ConsumerUpdated(_consumer);
     }
 
-    /// @notice Called by the authorized Functions consumer (e.g. Chainlink or ElizaOS agent) to update lock status
-    function updateLockFromFunctions(bool locked) external onlyConsumer {
-        isLocked = locked;
-        emit LockUpdated(locked);
+    function updateParameters(
+        uint256 maxLossPercentPerTrade,
+        uint256 maxLossTradesInTimeframe,
+        uint256 maxTradesInTimeframe,
+        uint256 cooldownDuration
+    ) external {
+        UserParameters storage params = userParams[msg.sender];
+
+        require(
+            !params.isLocked || params.guardianApproved,
+            "Cannot update while locked"
+        );
+
+        require(
+            block.timestamp > params.lastUpdated + 1 days || params.guardianApproved,
+            "Must wait 24hrs or get guardian approval"
+        );
+
+        userParams[msg.sender] = UserParameters({
+            maxLossPercentPerTrade: maxLossPercentPerTrade,
+            maxLossTradesInTimeframe: maxLossTradesInTimeframe,
+            maxTradesInTimeframe: maxTradesInTimeframe,
+            cooldownDuration: cooldownDuration,
+            lastUpdated: block.timestamp,
+            isLocked: params.isLocked,
+            guardianApproved: false
+        });
+
+        emit ParametersUpdated(msg.sender, userParams[msg.sender]);
     }
 
-    /// @notice Emergency unlock via guardian account
-    function guardianUnlock() external {
+    function updateLockFromFunctions(address user, bool locked) external onlyConsumer {
+        userParams[user].isLocked = locked;
+        emit LockUpdated(user, locked);
+    }
+
+    function guardianUnlock(address user) external {
         require(IGuardian(guardianContract).isGuardian(msg.sender), "Not guardian");
-        isLocked = false;
-        emit LockUpdated(false);
+        userParams[user].isLocked = false;
+        userParams[user].guardianApproved = false;
+        emit LockUpdated(user, false);
+    }
+
+    function approveGuardianOverride(address user) external {
+        require(IGuardian(guardianContract).isGuardian(msg.sender), "Not guardian");
+        userParams[user].guardianApproved = true;
+        emit GuardianOverride(user, true);
+    }
+
+    function isLocked(address user) external view returns (bool) {
+        return userParams[user].isLocked;
+    }
+
+    function getUserParameters(address user) external view returns (UserParameters memory) {
+        return userParams[user];
     }
 }
