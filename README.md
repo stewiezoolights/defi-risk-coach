@@ -12,7 +12,7 @@ A smart contract system designed to mitigate compulsive trading behavior by usin
 - 🧠 **AI Coach (ElizaOS)**: Personalized interaction & behavioral nudging
 - 🔍 **On-Chain Risk Contracts**: Trade limits, lock wallets, guardian-controlled unlocks
 - ⛓️ **Chainlink Functions**: Monitors user Perp-DEX activity and off-chain metrics
-- ⛓️ **Chainlink Automation**: Locks the users wallet based on functions results
+- ⛓️ **ElizaOS Automation**: Locks the users wallet based on functions results
 - 🌐 **Frontend App**: Simple wallet interface to configure and monitor risk settings
 
 ---
