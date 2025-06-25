@@ -20,9 +20,8 @@ const args = [
   "24", // timeframeHours
 ]
 
-console.log("📦 Chainlink Functions Request Args:", args)
-
-module.exports.buildRequestConfig = async () => ({
+// ✅ Shared config object
+const config = {
   codeLocation: Location.Inline,
   codeLanguage: CodeLanguage.JavaScript,
   source: fs.readFileSync(path.join(__dirname, "source/batchMonitorPerennial.js"), "utf-8"),
@@ -33,4 +32,10 @@ module.exports.buildRequestConfig = async () => ({
   bytesArgs: [],
   expectedReturnType: ReturnType.bytes,
   callbackGasLimit: 300000,
-})
+}
+
+// ✅ Export for simulate-script
+module.exports = {
+  ...config,
+  buildRequestConfig: async () => config,
+}

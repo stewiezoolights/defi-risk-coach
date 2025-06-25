@@ -103,7 +103,7 @@ contract RiskFunctionsConsumer is FunctionsClient, ConfirmedOwner {
 
       emit BatchLockStatusProcessed(users, statuses);
     } else {
-      // You can log the error if needed
+      // Log error if needed
     }
   }
 

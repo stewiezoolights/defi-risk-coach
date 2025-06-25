@@ -1,3 +1,6 @@
+// Import ethers 6 in Deno-style
+const { ethers } = await import("npm:ethers@6.10.0")
+
 const userCount = parseInt(args[0])
 const userAddresses = []
 const lockStatuses = []
@@ -59,4 +62,7 @@ for (let i = 0; i < userCount; i++) {
   lockStatuses.push(breach)
 }
 
-return Functions.encodeBytes(Functions.encodeAbiParameters(["address[]", "bool[]"], [userAddresses, lockStatuses]))
+// ✅ Encode return value using ethers@6 and return bytes
+const abiCoder = ethers.AbiCoder.defaultAbiCoder()
+const encodedData = abiCoder.encode(["address[]", "bool[]"], [userAddresses, lockStatuses])
+return ethers.getBytes(encodedData)

@@ -2,34 +2,34 @@
 pragma solidity ^0.8.19;
 
 contract Guardian {
-    address public owner;
-    mapping(address => bool) public guardians;
+    mapping(address => address) public userGuardian; // each user assigns their own guardian
 
-    event GuardianAdded(address indexed guardian);
-    event GuardianRemoved(address indexed guardian);
+    event GuardianAssigned(address indexed user, address indexed guardian);
+    event GuardianRevoked(address indexed user, address indexed guardian);
 
-    constructor() {
-        owner = msg.sender;
+    /**
+     * @notice Assigns a guardian for the caller (user)
+     */
+    function assignGuardian(address guardian) external {
+        require(guardian != address(0), "Invalid guardian");
+        userGuardian[msg.sender] = guardian;
+        emit GuardianAssigned(msg.sender, guardian);
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not owner");
-        _;
+    /**
+     * @notice Revokes guardian for the caller
+     */
+    function revokeGuardian() external {
+        address oldGuardian = userGuardian[msg.sender];
+        require(oldGuardian != address(0), "No guardian assigned");
+        delete userGuardian[msg.sender];
+        emit GuardianRevoked(msg.sender, oldGuardian);
     }
 
-    function addGuardian(address guardian) external onlyOwner returns (bool) {
-        guardians[guardian] = true;
-        emit GuardianAdded(guardian);
-        return true;
-    }
-
-    function removeGuardian(address guardian) external onlyOwner returns (bool) {
-        guardians[guardian] = false;
-        emit GuardianRemoved(guardian);
-        return true;
-    }
-
-    function isGuardian(address caller) external view returns (bool) {
-        return guardians[caller];
+    /**
+     * @notice Checks if `caller` is guardian for `user`
+     */
+    function isGuardianFor(address user, address caller) external view returns (bool) {
+        return userGuardian[user] == caller;
     }
 }
