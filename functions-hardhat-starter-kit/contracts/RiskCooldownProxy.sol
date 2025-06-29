@@ -24,17 +24,20 @@ contract RiskCooldownProxy {
     IRiskLock public immutable riskLock;
     address public owner;
     address public riskFunctionsConsumer;
+    uint256 public defaultCooldownDuration;
 
     event LockTriggered(address indexed user, uint256 unlockTime);
     event AutoUnlockPerformed(address indexed user);
     event ConsumerSet(address indexed consumer);
 
-    constructor(address _elizaAgent, address _riskLock) {
+    constructor(address _elizaAgent, address _riskLock, uint256 _defaultCooldown) {
         require(_elizaAgent != address(0), "Invalid Eliza agent");
         require(_riskLock != address(0), "Invalid RiskLock address");
+        require(_defaultCooldown > 0, "Default cooldown must be positive");
         elizaAgent = _elizaAgent;
         riskLock = IRiskLock(_riskLock);
         owner = msg.sender;
+        defaultCooldownDuration = _defaultCooldown;
     }
 
     modifier onlyAuthorizedCaller() {
@@ -62,10 +65,16 @@ contract RiskCooldownProxy {
         require(user != address(0), "Invalid user");
 
         // Pull cooldown duration from RiskLock
-        (, , , , uint256 cooldownDuration) = riskLock.getUserParameters(user);
-        require(cooldownDuration > 0, "Cooldown not configured");
+        (, , , , uint256 userCooldownDuration) = riskLock.getUserParameters(user);
 
-        uint256 unlockAt = block.timestamp + cooldownDuration;
+        uint256 finalCooldown = userCooldownDuration;
+        if (finalCooldown == 0) {
+            finalCooldown = defaultCooldownDuration;
+        }
+
+        require(finalCooldown > 0, "Cooldown not configured and no default");
+
+        uint256 unlockAt = block.timestamp + finalCooldown;
         locks[user] = LockInfo(unlockAt, true);
 
         emit LockTriggered(user, unlockAt);

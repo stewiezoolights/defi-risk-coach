@@ -45,8 +45,13 @@ async function deployWizard() {
 
   // 4. Deploy RiskCooldownProxy (depends on RiskLock)
   console.log("4. Deploying RiskCooldownProxy...")
-  const Proxy = await hre.ethers.getContractFactory("contracts/RiskCooldownProxy.sol:RiskCooldownProxy")
-  const cooldownProxy = await Proxy.deploy(elizaAgent, riskLock.address)
+  const cooldownProxyFactory = await hre.ethers.getContractFactory("contracts/RiskCooldownProxy.sol:RiskCooldownProxy")
+  const seventyTwoHoursInSeconds = 72 * 60 * 60
+  const cooldownProxy = await cooldownProxyFactory.deploy(
+    elizaAgent,
+    riskLock.address,
+    seventyTwoHoursInSeconds
+  )
   await cooldownProxy.deployed()
   writeDeployment(net, "RiskCooldownProxy", cooldownProxy.address)
   console.log(`✅ RiskCooldownProxy deployed to: ${cooldownProxy.address}`)
