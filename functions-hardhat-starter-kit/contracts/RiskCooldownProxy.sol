@@ -68,7 +68,6 @@ contract RiskCooldownProxy {
         uint256 unlockAt = block.timestamp + cooldownDuration;
         locks[user] = LockInfo(unlockAt, true);
 
-        riskLock.updateLockFromFunctions(user, true);
         emit LockTriggered(user, unlockAt);
     }
 
