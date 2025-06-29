@@ -12,6 +12,7 @@ contract Guardian {
      */
     function assignGuardian(address guardian) external {
         require(guardian != address(0), "Invalid guardian");
+        require(userGuardian[msg.sender] == address(0), "Guardian already assigned. Revoke first.");
         userGuardian[msg.sender] = guardian;
         emit GuardianAssigned(msg.sender, guardian);
     }

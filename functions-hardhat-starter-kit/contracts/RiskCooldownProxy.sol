@@ -13,7 +13,6 @@ interface IRiskLock {
     );
 }
 
-
 contract RiskCooldownProxy {
     struct LockInfo {
         uint256 unlockTimestamp;
@@ -21,40 +20,50 @@ contract RiskCooldownProxy {
     }
 
     mapping(address => LockInfo) public locks;
+
     address public immutable elizaAgent;
+    address public immutable riskFunctionsConsumer;
     IRiskLock public immutable riskLock;
 
     event LockTriggered(address indexed user, uint256 unlockTime);
     event AutoUnlockPerformed(address indexed user);
 
-    constructor(address _elizaAgent, address _riskLock) {
+    constructor(
+        address _elizaAgent,
+        address _riskLock,
+        address _riskFunctionsConsumer
+    ) {
         require(_elizaAgent != address(0), "Invalid Eliza agent");
         require(_riskLock != address(0), "Invalid RiskLock address");
+        require(_riskFunctionsConsumer != address(0), "Invalid consumer address");
         elizaAgent = _elizaAgent;
         riskLock = IRiskLock(_riskLock);
+        riskFunctionsConsumer = _riskFunctionsConsumer;
     }
 
-    modifier onlyEliza() {
-        require(msg.sender == elizaAgent, "Caller is not Eliza");
+    modifier onlyAuthorized() {
+        require(
+            msg.sender == elizaAgent || msg.sender == riskFunctionsConsumer,
+            "Caller is not authorized"
+        );
         _;
     }
 
-  function onLockTriggered(address user) external onlyEliza {
-    require(user != address(0), "Invalid user");
+    /// Called by ElizaOS or Chainlink Functions to initiate cooldown
+    function triggerCooldown(address user) external onlyAuthorized {
+        require(user != address(0), "Invalid user");
 
-    // Pull cooldown duration from RiskLock
-    (, , , , uint256 cooldownDuration) = riskLock.getUserParameters(user);
-    require(cooldownDuration > 0, "Cooldown not configured");
+        (, , , , uint256 cooldownDuration) = riskLock.getUserParameters(user);
+        require(cooldownDuration > 0, "Cooldown not configured");
 
-    uint256 unlockAt = block.timestamp + cooldownDuration;
-    locks[user] = LockInfo(unlockAt, true);
+        uint256 unlockAt = block.timestamp + cooldownDuration;
+        locks[user] = LockInfo(unlockAt, true);
 
-    riskLock.updateLockFromFunctions(user, true);
-    emit LockTriggered(user, unlockAt);
-}
+        riskLock.updateLockFromFunctions(user, true);
+        emit LockTriggered(user, unlockAt);
+    }
 
-
-    /// Chainlink Automation-compatible interface to unlock the traders wallet
+    /// Chainlink Automation-compatible interface to unlock the trader's wallet
     function checkUpkeep(bytes calldata checkData) external view returns (bool upkeepNeeded, bytes memory performData) {
         address user = abi.decode(checkData, (address));
         LockInfo memory info = locks[user];

@@ -85,26 +85,36 @@ contract RiskFunctionsConsumer is FunctionsClient, ConfirmedOwner {
    * @notice Fulfillment logic called by Chainlink Functions
    *         Expects response to be (address[] users, bool[] statuses)
    */
-  function fulfillRequest(
-    bytes32, /* requestId */
-    bytes memory response,
-    bytes memory err
-  ) internal override {
-    if (err.length == 0) {
-      (address[] memory users, bool[] memory statuses) = abi.decode(response, (address[], bool[]));
-      require(users.length == statuses.length, "Mismatched batch lengths");
+function fulfillRequest(
+  bytes32 requestId,
+  bytes memory response,
+  bytes memory err
+) internal override {
+  // 1) Unwrap the CBOR envelope
+  (bytes memory resultData, bytes memory errorData) = FunctionsClient.decodeResponse(response, err);
 
-      for (uint256 i = 0; i < users.length; i++) {
-        if (users[i] != address(0) && statuses[i]) {
-          riskLock.updateLockFromFunctions(users[i], true);
-          cooldownProxy.triggerCooldown(users[i]);
-        }
-      }
+  // 2) If there was an on-chain error, bubble it up (optional)
+  if (errorData.length > 0) {
+    revert(string(errorData));
+  }
 
-      emit BatchLockStatusProcessed(users, statuses);
-    } else {
-      // Log error if needed
+  // 3) Decode your batch payload
+  (address[] memory users, bool[] memory statuses) = abi.decode(
+    resultData,
+    (address[], bool[])
+  );
+  require(users.length == statuses.length, "Mismatched batch lengths");
+
+  // 4) Process each user
+  for (uint256 i = 0; i < users.length; i++) {
+    if (users[i] != address(0) && statuses[i]) {
+      riskLock.updateLockFromFunctions(users[i], true);
+      cooldownProxy.triggerCooldown(users[i]);
     }
+  }
+
+  emit BatchLockStatusProcessed(users, statuses);
+}
   }
 
   function setDonId(bytes32 newDonId) external onlyOwner {
