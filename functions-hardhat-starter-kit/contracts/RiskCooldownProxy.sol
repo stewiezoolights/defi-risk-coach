@@ -20,28 +20,24 @@ contract RiskCooldownProxy {
     }
 
     mapping(address => LockInfo) public locks;
-
     address public immutable elizaAgent;
-    address public immutable riskFunctionsConsumer;
     IRiskLock public immutable riskLock;
+    address public owner;
+    address public riskFunctionsConsumer;
 
     event LockTriggered(address indexed user, uint256 unlockTime);
     event AutoUnlockPerformed(address indexed user);
+    event ConsumerSet(address indexed consumer);
 
-    constructor(
-        address _elizaAgent,
-        address _riskLock,
-        address _riskFunctionsConsumer
-    ) {
+    constructor(address _elizaAgent, address _riskLock) {
         require(_elizaAgent != address(0), "Invalid Eliza agent");
         require(_riskLock != address(0), "Invalid RiskLock address");
-        require(_riskFunctionsConsumer != address(0), "Invalid consumer address");
         elizaAgent = _elizaAgent;
         riskLock = IRiskLock(_riskLock);
-        riskFunctionsConsumer = _riskFunctionsConsumer;
+        owner = msg.sender;
     }
 
-    modifier onlyAuthorized() {
+    modifier onlyAuthorizedCaller() {
         require(
             msg.sender == elizaAgent || msg.sender == riskFunctionsConsumer,
             "Caller is not authorized"
@@ -49,10 +45,23 @@ contract RiskCooldownProxy {
         _;
     }
 
-    /// Called by ElizaOS or Chainlink Functions to initiate cooldown
-    function triggerCooldown(address user) external onlyAuthorized {
+    /**
+     * @notice Allows the owner to set the authorized RiskFunctionsConsumer contract address.
+     */
+    function setConsumer(address _consumer) external {
+        require(msg.sender == owner, "Only owner can set consumer");
+        require(_consumer != address(0), "Invalid consumer address");
+        riskFunctionsConsumer = _consumer;
+        emit ConsumerSet(_consumer);
+    }
+
+    /**
+     * @notice Initiates a user's cooldown period. Can be called by Eliza or the Functions Consumer.
+     */
+    function triggerCooldown(address user) external onlyAuthorizedCaller {
         require(user != address(0), "Invalid user");
 
+        // Pull cooldown duration from RiskLock
         (, , , , uint256 cooldownDuration) = riskLock.getUserParameters(user);
         require(cooldownDuration > 0, "Cooldown not configured");
 

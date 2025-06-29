@@ -20,16 +20,39 @@ async function deployWizard() {
   console.log(`Deployer: ${deployer.address}\n`)
 
   // 1. Deploy Guardian
+  console.log("1. Deploying Guardian...")
   const Guardian = await hre.ethers.getContractFactory("contracts/Gaurdian.sol:Guardian")
   const guardian = await Guardian.deploy()
   await guardian.deployed()
   writeDeployment(net, "Guardian", guardian.address)
+  console.log(`✅ Guardian deployed to: ${guardian.address}`)
 
   // 2. Prompt for Eliza Agent
-  const elizaAgent = await prompt("🤖 Enter ElizaOS agent address: ")
+  const elizaAgent = await prompt("2. 🤖 Enter ElizaOS agent address: ")
   writeDeployment(net, "ElizaAgent", elizaAgent)
 
-  // 3. Deploy placeholder Consumer
+  // 3. Deploy RiskLock (with placeholder for consumer and proxy)
+  console.log("3. Deploying RiskLock...")
+  const RiskLock = await hre.ethers.getContractFactory("contracts/RiskLock.sol:RiskLock")
+  const riskLock = await RiskLock.deploy(
+    "0x0000000000000000000000000000000000000000", // placeholder consumer
+    "0x0000000000000000000000000000000000000000", // placeholder proxy
+    guardian.address
+  )
+  await riskLock.deployed()
+  writeDeployment(net, "RiskLock", riskLock.address)
+  console.log(`✅ RiskLock deployed to: ${riskLock.address}`)
+
+  // 4. Deploy RiskCooldownProxy (depends on RiskLock)
+  console.log("4. Deploying RiskCooldownProxy...")
+  const Proxy = await hre.ethers.getContractFactory("contracts/RiskCooldownProxy.sol:RiskCooldownProxy")
+  const cooldownProxy = await Proxy.deploy(elizaAgent, riskLock.address)
+  await cooldownProxy.deployed()
+  writeDeployment(net, "RiskCooldownProxy", cooldownProxy.address)
+  console.log(`✅ RiskCooldownProxy deployed to: ${cooldownProxy.address}`)
+
+  // 5. Deploy RiskFunctionsConsumer (depends on RiskLock and CooldownProxy)
+  console.log("5. Deploying RiskFunctionsConsumer...")
   const router = hre.network.config.functionsRouter || "UNSET"
   const donId = hre.network.config.donId || "UNSET"
   if (router === "UNSET" || donId === "UNSET") throw new Error("❌ Missing router or DON ID in network config")
@@ -38,53 +61,39 @@ async function deployWizard() {
   const ConsumerFactory = await hre.ethers.getContractFactory(
     "contracts/RiskFunctionsConsumer.sol:RiskFunctionsConsumer"
   )
-  const placeholderConsumer = await ConsumerFactory.deploy(
+  const consumer = await ConsumerFactory.deploy(
     router,
     donIdBytes32,
-    "0x0000000000000000000000000000000000000000",
-    "0x0000000000000000000000000000000000000000",
-    guardian.address,
-    elizaAgent
-  )
-  await placeholderConsumer.deployed()
-  console.log("🚧 Deployed temporary consumer at:", placeholderConsumer.address)
-
-  // 4. Deploy RiskLock with placeholder proxy
-  const RiskLock = await hre.ethers.getContractFactory("contracts/RiskLock.sol:RiskLock")
-  const placeholderLock = await RiskLock.deploy(
-    placeholderConsumer.address,
-    "0x0000000000000000000000000000000000000000",
-    guardian.address
-  )
-  await placeholderLock.deployed()
-  console.log("🚧 Deployed temporary lock at:", placeholderLock.address)
-
-  // 5. Deploy real CooldownProxy
-  const Proxy = await hre.ethers.getContractFactory("contracts/RiskCooldownProxy.sol:RiskCooldownProxy")
-  const cooldownProxy = await Proxy.deploy(elizaAgent, placeholderLock.address)
-  await cooldownProxy.deployed()
-  writeDeployment(net, "RiskCooldownProxy", cooldownProxy.address)
-
-  // 6. Redeploy Consumer with real lock + proxy
-  const finalConsumer = await ConsumerFactory.deploy(
-    router,
-    donIdBytes32,
-    placeholderLock.address,
+    riskLock.address,
     cooldownProxy.address,
     guardian.address,
     elizaAgent
   )
-  await finalConsumer.deployed()
-  writeDeployment(net, "RiskFunctionsConsumer", finalConsumer.address)
+  await consumer.deployed()
+  writeDeployment(net, "RiskFunctionsConsumer", consumer.address)
+  console.log(`✅ RiskFunctionsConsumer deployed to: ${consumer.address}`)
 
-  // 7. Redeploy RiskLock with final consumer + proxy
-  const finalLock = await RiskLock.deploy(finalConsumer.address, cooldownProxy.address, guardian.address)
-  await finalLock.deployed()
-  writeDeployment(net, "RiskLock", finalLock.address)
+  // 6. Link dependencies using setter functions
+  console.log("\n6. Linking contract dependencies...")
 
-  // 8. Save all .env variables (AFTER finalConsumer and finalLock exist!)
-  writeEnvVariable("RISK_LOCK_ADDRESS", finalLock.address)
-  writeEnvVariable("RISK_CONSUMER_ADDRESS", finalConsumer.address)
+  console.log("   - Setting consumer on RiskLock...")
+  const tx1 = await riskLock.setConsumer(consumer.address)
+  await tx1.wait()
+  console.log("   ✅ RiskLock linked to consumer.")
+
+  console.log("   - Setting cooldown proxy on RiskLock...")
+  const tx2 = await riskLock.setCooldownProxy(cooldownProxy.address)
+  await tx2.wait()
+  console.log("   ✅ RiskLock linked to cooldown proxy.")
+
+  console.log("   - Setting consumer on RiskCooldownProxy...")
+  const tx3 = await cooldownProxy.setConsumer(consumer.address)
+  await tx3.wait()
+  console.log("   ✅ RiskCooldownProxy linked to consumer.")
+
+  // 7. Save all .env variables
+  writeEnvVariable("RISK_LOCK_ADDRESS", riskLock.address)
+  writeEnvVariable("RISK_CONSUMER_ADDRESS", consumer.address)
   writeEnvVariable("GUARDIAN_ADDRESS", guardian.address)
   writeEnvVariable("COOLDOWN_PROXY_ADDRESS", cooldownProxy.address)
   writeEnvVariable("ELIZA_AGENT_ADDRESS", elizaAgent)
@@ -92,8 +101,8 @@ async function deployWizard() {
   console.log("\n✅ Deployment Complete:")
   console.log(`Guardian:               ${guardian.address}`)
   console.log(`CooldownProxy:          ${cooldownProxy.address}`)
-  console.log(`RiskFunctionsConsumer:  ${finalConsumer.address}`)
-  console.log(`RiskLock:               ${finalLock.address}`)
+  console.log(`RiskFunctionsConsumer:  ${consumer.address}`)
+  console.log(`RiskLock:               ${riskLock.address}`)
 
   console.log(`\n📝 Saved to: deployments/${net}.json and .env`)
 }

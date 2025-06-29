@@ -13,14 +13,17 @@ interface IGuardian {
 contract RiskLock {
   mapping(address => bool) public isLocked;
 
-  address public immutable riskFunctionsConsumer;
-  IRiskCooldownProxy public immutable cooldownProxy;
+  address public riskFunctionsConsumer;
+  IRiskCooldownProxy public cooldownProxy;
   IGuardian public immutable guardian;
+  address public owner;
 
   event Locked(address indexed user, uint256 timestamp);
   event Unlocked(address indexed user, uint256 timestamp);
   event ParametersUpdated(address indexed user);
   event MonitorRequested(address indexed user);
+  event ConsumerSet(address indexed consumer);
+  event CooldownProxySet(address indexed proxy);
 
   struct Parameters {
     uint256 maxLossPercent;
@@ -51,6 +54,27 @@ contract RiskLock {
     riskFunctionsConsumer = _consumer;
     cooldownProxy = IRiskCooldownProxy(_cooldownProxy);
     guardian = IGuardian(_guardian);
+    owner = msg.sender;
+  }
+
+  /**
+   * @notice Allows the owner to set or update the authorized RiskFunctionsConsumer address.
+   */
+  function setConsumer(address _consumer) external {
+    require(msg.sender == owner, "Only owner can set consumer");
+    require(_consumer != address(0), "Invalid consumer address");
+    riskFunctionsConsumer = _consumer;
+    emit ConsumerSet(_consumer);
+  }
+
+  /**
+   * @notice Allows the owner to set or update the RiskCooldownProxy address.
+   */
+  function setCooldownProxy(address _proxy) external {
+    require(msg.sender == owner, "Only owner can set proxy");
+    require(_proxy != address(0), "Invalid proxy address");
+    cooldownProxy = IRiskCooldownProxy(_proxy);
+    emit CooldownProxySet(_proxy);
   }
 
   // --- Core Locking ---
