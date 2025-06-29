@@ -115,7 +115,7 @@ function fulfillRequest(
 
   emit BatchLockStatusProcessed(users, statuses);
 }
-  }
+
 
   function setDonId(bytes32 newDonId) external onlyOwner {
     donId = newDonId;

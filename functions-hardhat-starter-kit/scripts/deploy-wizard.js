@@ -21,7 +21,7 @@ async function deployWizard() {
 
   // 1. Deploy Guardian
   console.log("1. Deploying Guardian...")
-  const Guardian = await hre.ethers.getContractFactory("contracts/Gaurdian.sol:Guardian")
+  const Guardian = await hre.ethers.getContractFactory("contracts/Guardian.sol:Guardian")
   const guardian = await Guardian.deploy()
   await guardian.deployed()
   writeDeployment(net, "Guardian", guardian.address)
